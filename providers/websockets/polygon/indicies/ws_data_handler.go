@@ -65,8 +65,8 @@ func (h *WebSocketHandler) HandleMessage(
 	message []byte,
 ) (types.PriceResponse, []handlers.WebsocketEncodedMessage, error) {
 	var (
-		resp            types.PriceResponse
-		indicesResponse IndicesResponse
+		resp             types.PriceResponse
+		indicesResponses []IndicesResponse
 	)
 
 	var msgs []json.RawMessage
@@ -74,27 +74,25 @@ func (h *WebSocketHandler) HandleMessage(
 		return resp, nil, fmt.Errorf("failed to process raw messages: %w", err)
 	}
 
-	// msgs size should be 1
-	if len(msgs) != 1 {
-		return resp, nil, fmt.Errorf("expected 1 message, got %d", len(msgs))
+	for _, msg := range msgs {
+		var ev models.EventType
+		err := json.Unmarshal(msg, &ev)
+		if err != nil {
+			return resp, nil, fmt.Errorf("failed to unmarshal event: %w", err)
+		}
+		switch ev.EventType {
+		case "status":
+			continue
+		case "V": // this is indices response so this event is for index value
+			var indicesResponse IndicesResponse
+			if err := json.Unmarshal(msg, &indicesResponse); err != nil {
+				return resp, nil, fmt.Errorf("failed to unmarshal index value: %w", err)
+			}
+			indicesResponses = append(indicesResponses, indicesResponse)
+		}
 	}
 
-	msg := msgs[0]
-	var ev models.EventType
-	err := json.Unmarshal(msg, &ev)
-	if err != nil {
-		return resp, nil, fmt.Errorf("failed to unmarshal event: %w", err)
-	}
-	switch ev.EventType {
-	case "status":
-		return resp, nil, nil
-	case "V": // this is indices response so this event is for index value
-		if err := json.Unmarshal(msg, &indicesResponse); err != nil {
-			return resp, nil, fmt.Errorf("failed to unmarshal index value: %w", err)
-		}
-		resp, err := h.parseIndicesResponse(indicesResponse)
-		return resp, nil, err
-	}
+	resp, err := h.parseIndicesResponse(indicesResponses)
 
 	return resp, nil, err
 }

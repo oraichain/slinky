@@ -8,22 +8,24 @@ import (
 	"github.com/dydxprotocol/slinky/pkg/math"
 )
 
-func (h *WebSocketHandler) parseIndicesResponse(resp IndicesResponse) (types.PriceResponse, error) {
+func (h *WebSocketHandler) parseIndicesResponse(resp []IndicesResponse) (types.PriceResponse, error) {
 	var (
 		resolved   = make(types.ResolvedPrices)
 		unresolved = make(types.UnResolvedPrices)
 	)
 
-	// Convert the price to a big.Float.
-	price := math.Float64ToBigFloat(resp.Value)
+	for _, r := range resp {
+		// Convert the price to a big.Float.
+		price := math.Float64ToBigFloat(r.Value)
 
-	ticker, ok := h.cache.FromOffChainTicker(resp.Ticker)
-	if !ok {
-		return types.NewPriceResponse(resolved, unresolved), fmt.Errorf("unknown ticker %s", resp.Ticker)
+		ticker, ok := h.cache.FromOffChainTicker(r.Ticker)
+		if !ok {
+			return types.NewPriceResponse(resolved, unresolved), fmt.Errorf("unknown ticker %s", r.Ticker)
+		}
+
+		timestamp := time.Unix(r.TimeStamp, 0)
+		resolved[ticker] = types.NewPriceResult(price, timestamp)
 	}
 
-	timestamp := time.Unix(resp.TimeStamp, 0)
-
-	resolved[ticker] = types.NewPriceResult(price, timestamp)
 	return types.NewPriceResponse(resolved, unresolved), nil
 }
