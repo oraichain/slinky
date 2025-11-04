@@ -13,3 +13,13 @@ func WithPreDialHook(hook PreDialHook) Option {
 		r.preDialHook = hook
 	}
 }
+
+func WithPostDialHook(hook PostDialHook) Option {
+	return func(r *WebSocketConnHandlerImpl) {
+		if hook == nil {
+			panic("post-dial hook cannot be nil")
+		}
+
+		r.postDialHook = hook
+	}
+}

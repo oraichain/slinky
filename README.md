@@ -28,11 +28,11 @@ $ go install github.com/dydxprotocol/slinky
 
 The slinky repository is composed of the following core packages:
 
-* **abci** - This package contains the [vote extension](./abci/ve/README.md), [proposal](./abci/proposals/README.md), and [preblock handlers](./abci/preblock/oracle/README.md) that are used to broadcast oracle data to the network and to store it in the blockchain.
-* **oracle** - This [package](./oracle/) contains the main oracle that aggregates external data sources before broadcasting it to the network. You can reference the provider documentation [here](./providers/base/README.md) to get a high level overview of how the oracle works.
-* **providers** - This package contains a collection of [websocket](./providers/websockets/README.md) and [API](./providers/apis/README.md) based data providers that are used by the oracle to collect external data.
-* **x/oracle** - This package contains a Cosmos SDK module that allows you to store oracle data on a blockchain.
-* **x/marketmap** - This [package](./x/marketmap/README.md) contains  a Cosmos SDK module that allows for market configuration to be stored and updated on a blockchain.
+- **abci** - This package contains the [vote extension](./abci/ve/README.md), [proposal](./abci/proposals/README.md), and [preblock handlers](./abci/preblock/oracle/README.md) that are used to broadcast oracle data to the network and to store it in the blockchain.
+- **oracle** - This [package](./oracle/) contains the main oracle that aggregates external data sources before broadcasting it to the network. You can reference the provider documentation [here](./providers/base/README.md) to get a high level overview of how the oracle works.
+- **providers** - This package contains a collection of [websocket](./providers/websockets/README.md) and [API](./providers/apis/README.md) based data providers that are used by the oracle to collect external data.
+- **x/oracle** - This package contains a Cosmos SDK module that allows you to store oracle data on a blockchain.
+- **x/marketmap** - This [package](./x/marketmap/README.md) contains a Cosmos SDK module that allows for market configuration to be stored and updated on a blockchain.
 
 ## Validator Usage
 
@@ -87,11 +87,31 @@ $ make stop-all-dev
 ### Oracle Service Metrics
 
 We have an extensive suite of metrics available to validators and chain operators.
- Please [join our discord](https://discord.gg/PeBGE9jrbu) if you want help setting them up!
+Please [join our discord](https://discord.gg/PeBGE9jrbu) if you want help setting them up!
 
-* metrics relevant to the oracle service's health + operation are [here](./metrics.md)
+- metrics relevant to the oracle service's health + operation are [here](./metrics.md)
 
 ### Oracle Application / Network Metrics
 
-* metrics relevant to the network's (that is running the instance of slinky) performance are [here](./service/metrics/README.md)
+- metrics relevant to the network's (that is running the instance of slinky) performance are [here](./service/metrics/README.md)
 
+slinky --marketmap-provider dydx_migration_api --oracle-config oracle.json
+
+````
+      {
+        "name": "raydium_api",
+        "off_chain_ticker": "MAX,RAYDIUM,oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h/SOL,RAYDIUM,SO11111111111111111111111111111111111111112",
+        "normalize_by_pair": { "Base": "SOL", "Quote": "USD" },
+        "invert": false,
+        "metadata_JSON": ""
+      },
+      {
+        "name": "gate_ws",
+				"off_chain_ticker": "MAXSOL_USDT",
+				"normalize_by_pair": {
+				  "Base": "USDT",
+				  "Quote": "USD"
+				}
+      },
+      ```
+````

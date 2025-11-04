@@ -89,6 +89,10 @@ func Float64StringToBigFloat(s string) (*big.Float, error) {
 	return bigFloat, nil
 }
 
+func Float64ToBigFloat(val float64) *big.Float {
+	return new(big.Float).SetFloat64(val)
+}
+
 // ScaleBigFloat scales a big.Float by the given decimals.
 func ScaleBigFloat(f *big.Float, decimals uint64) *big.Float {
 	bigFloat := new(big.Float)
