@@ -110,8 +110,6 @@ func (h *WebSocketHandler) CreateMessages(
 		h.cache.Add(ticker)
 	}
 
-	fmt.Println("polygon indices creating messages: ", params)
-
 	msg, err := json.Marshal(&models.ControlMessage{
 		Action: "subscribe",
 		Params: strings.Join(params, ","),

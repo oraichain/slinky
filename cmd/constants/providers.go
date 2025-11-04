@@ -15,6 +15,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/apis/dydx"
 	krakenapi "github.com/dydxprotocol/slinky/providers/apis/kraken"
 	"github.com/dydxprotocol/slinky/providers/apis/marketmap"
+	polygon_api "github.com/dydxprotocol/slinky/providers/apis/polygon/indices"
 	"github.com/dydxprotocol/slinky/providers/apis/polymarket"
 	"github.com/dydxprotocol/slinky/providers/volatile"
 	binancews "github.com/dydxprotocol/slinky/providers/websockets/binance"
@@ -93,6 +94,14 @@ var (
 			API:  volatile.DefaultAPIConfig,
 			Type: types.ConfigType,
 		},
+
+		// indices api providers
+		{
+			Name: polygon_api.Name,
+			API:  polygon_api.DefaultAPIConfig,
+			Type: types.ConfigType,
+		},
+
 		// Exchange WebSocket providers
 		{
 			Name:      binancews.Name,
@@ -155,6 +164,8 @@ var (
 			WebSocket: okx.DefaultWebSocketConfig,
 			Type:      types.ConfigType,
 		},
+
+		// indices ws providers
 		{
 			Name:      polygonindicies.PolygonIndicesName,
 			WebSocket: polygonindicies.DefaultPolygonIndicesWebSocketConfig,

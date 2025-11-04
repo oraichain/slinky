@@ -20,6 +20,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/apis/defi/uniswapv3"
 	"github.com/dydxprotocol/slinky/providers/apis/geckoterminal"
 	"github.com/dydxprotocol/slinky/providers/apis/kraken"
+	polygonindices "github.com/dydxprotocol/slinky/providers/apis/polygon/indices"
 	"github.com/dydxprotocol/slinky/providers/apis/polymarket"
 	apihandlers "github.com/dydxprotocol/slinky/providers/base/api/handlers"
 	"github.com/dydxprotocol/slinky/providers/base/api/metrics"
@@ -98,6 +99,8 @@ func APIQueryHandlerFactory(
 		apiPriceFetcher, err = osmosis.NewAPIPriceFetcher(logger, cfg.API, metrics)
 	case providerName == polymarket.Name:
 		apiDataHandler, err = polymarket.NewAPIHandler(cfg.API)
+	case providerName == polygonindices.Name:
+		apiDataHandler, err = polygonindices.NewAPIHandler(cfg.API)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", cfg.Name)
 	}

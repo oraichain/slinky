@@ -105,6 +105,7 @@ func (pf *RestAPIFetcher[K, V]) Fetch(
 
 	// Record the status code in the metrics.
 	resp, err := pf.requestHandler.Do(apiCtx, url)
+
 	pf.metrics.AddHTTPStatusCode(pf.config.Name, resp)
 	if err != nil {
 		status := providertypes.ErrorUnknown
