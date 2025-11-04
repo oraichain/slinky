@@ -29,6 +29,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/websockets/kucoin"
 	"github.com/dydxprotocol/slinky/providers/websockets/mexc"
 	"github.com/dydxprotocol/slinky/providers/websockets/okx"
+	polygonindicies "github.com/dydxprotocol/slinky/providers/websockets/polygon/indicies"
 	mmtypes "github.com/dydxprotocol/slinky/service/clients/marketmap/types"
 )
 
@@ -152,6 +153,11 @@ var (
 		{
 			Name:      okx.Name,
 			WebSocket: okx.DefaultWebSocketConfig,
+			Type:      types.ConfigType,
+		},
+		{
+			Name:      polygonindicies.PolygonIndicesName,
+			WebSocket: polygonindicies.DefaultPolygonIndicesWebSocketConfig,
 			Type:      types.ConfigType,
 		},
 

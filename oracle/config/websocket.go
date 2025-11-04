@@ -141,6 +141,9 @@ type WebSocketConfig struct {
 	// MaxSubscriptionsPerBatch is the maximum number of subscription messages that the
 	// provider will send in a single batch/write.
 	MaxSubscriptionsPerBatch int `json:"maxSubscriptionsPerBatch"`
+
+	// MarketType // this params is only used for polygon websocket
+	MarketType string `json:"marketType"`
 }
 
 // ValidateBasic performs basic validation of the websocket config.

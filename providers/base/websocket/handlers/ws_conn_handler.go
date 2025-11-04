@@ -18,6 +18,10 @@ type (
 	// PreDialHook is a function that is called before the connection is established. This
 	// is useful for dynamically generating configurations for the connection.
 	PreDialHook func(*WebSocketConnHandlerImpl) error
+
+	// PostDialHook is a function that is called after the connection is established. This
+	// is useful for dynamically generating configurations for the connection.
+	PostDialHook func(*WebSocketConnHandlerImpl) error
 )
 
 // WebSocketConnHandler is an interface the encapsulates the functionality of a websocket
@@ -54,10 +58,13 @@ type WebSocketConnHandlerImpl struct {
 	cfg config.WebSocketConfig
 
 	// conn is the connection to the data provider.
-	conn *websocket.Conn
+	Conn *websocket.Conn
 
 	// preDialHook is a function that is called before the connection is established.
 	preDialHook PreDialHook
+
+	// postDialHook is a function that is called after the connection is established.
+	postDialHook PostDialHook
 }
 
 // NewWebSocketHandlerImpl returns a new WebSocketConnHandlerImpl.
@@ -101,7 +108,14 @@ func (h *WebSocketConnHandlerImpl) Dial() error {
 	}
 
 	var err error
-	h.conn, _, err = h.CreateDialer().Dial(h.cfg.Endpoints[0].URL, nil)
+	h.Conn, _, err = h.CreateDialer().Dial(h.cfg.Endpoints[0].URL, nil)
+
+	if h.postDialHook != nil {
+		if err := h.postDialHook(h); err != nil {
+			return err
+		}
+	}
+
 	return err
 }
 
@@ -111,16 +125,16 @@ func (h *WebSocketConnHandlerImpl) Read() ([]byte, error) {
 	h.Lock()
 	defer h.Unlock()
 
-	if h.conn == nil {
+	if h.Conn == nil {
 		return nil, fmt.Errorf("connection has not been established")
 	}
 
 	// Set the read deadline to the configured read timeout.
-	if err := h.conn.SetReadDeadline(time.Now().Add(h.cfg.ReadTimeout)); err != nil {
+	if err := h.Conn.SetReadDeadline(time.Now().Add(h.cfg.ReadTimeout)); err != nil {
 		return nil, err
 	}
 
-	_, message, err := h.conn.ReadMessage()
+	_, message, err := h.Conn.ReadMessage()
 	return message, err
 }
 
@@ -130,16 +144,16 @@ func (h *WebSocketConnHandlerImpl) Write(message []byte) error {
 	h.Lock()
 	defer h.Unlock()
 
-	if h.conn == nil {
+	if h.Conn == nil {
 		return fmt.Errorf("connection has not been established")
 	}
 
 	// Set the write deadline to the configured write timeout.
-	if err := h.conn.SetWriteDeadline(time.Now().Add(h.cfg.WriteTimeout)); err != nil {
+	if err := h.Conn.SetWriteDeadline(time.Now().Add(h.cfg.WriteTimeout)); err != nil {
 		return err
 	}
 
-	return h.conn.WriteMessage(websocket.TextMessage, message)
+	return h.Conn.WriteMessage(websocket.TextMessage, message)
 }
 
 // Close is used to close the connection to the data provider.
@@ -147,23 +161,23 @@ func (h *WebSocketConnHandlerImpl) Close() error {
 	h.Lock()
 	defer h.Unlock()
 
-	if h.conn == nil {
+	if h.Conn == nil {
 		return fmt.Errorf("connection has not been established")
 	}
 
 	// Set the write deadline to the configured write timeout.
-	if err := h.conn.SetWriteDeadline(time.Now().Add(h.cfg.WriteTimeout)); err != nil {
+	if err := h.Conn.SetWriteDeadline(time.Now().Add(h.cfg.WriteTimeout)); err != nil {
 		return err
 	}
 
 	// Cleanly close the connection by sending a close message and then
 	// waiting (with a timeout) for the server to close the connection.
-	err := h.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	err := h.Conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	if err != nil {
 		return err
 	}
 
-	return h.conn.Close()
+	return h.Conn.Close()
 }
 
 // Copy is used to create a copy of the connection handler. This is useful for creating multiple
@@ -173,8 +187,9 @@ func (h *WebSocketConnHandlerImpl) Copy() WebSocketConnHandler {
 	defer h.Unlock()
 
 	return &WebSocketConnHandlerImpl{
-		cfg:         h.cfg,
-		preDialHook: h.preDialHook,
+		cfg:          h.cfg,
+		preDialHook:  h.preDialHook,
+		postDialHook: h.postDialHook,
 	}
 }
 

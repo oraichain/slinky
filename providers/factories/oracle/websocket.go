@@ -24,6 +24,7 @@ import (
 	"github.com/dydxprotocol/slinky/providers/websockets/kucoin"
 	"github.com/dydxprotocol/slinky/providers/websockets/mexc"
 	"github.com/dydxprotocol/slinky/providers/websockets/okx"
+	polygonindicies "github.com/dydxprotocol/slinky/providers/websockets/polygon/indicies"
 )
 
 // WebSocketQueryHandlerFactory returns a sample implementation of the websocket query handler
@@ -100,6 +101,20 @@ func WebSocketQueryHandlerFactory(
 		wsDataHandler, err = mexc.NewWebSocketDataHandler(logger, cfg.WebSocket)
 	case okx.Name:
 		wsDataHandler, err = okx.NewWebSocketDataHandler(logger, cfg.WebSocket)
+	case polygonindicies.PolygonIndicesName:
+		wsDataHandler, err = polygonindicies.NewWebSocketDataHandler(logger, cfg.WebSocket)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create the Polygon websocket connection handler.
+		connHandler, err = wshandlers.NewWebSocketHandlerImpl(
+			cfg.WebSocket,
+			wshandlers.WithPostDialHook(polygonindicies.PostDialHook(cfg)),
+		)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", cfg.Name)
 	}
